@@ -21,7 +21,7 @@ Compatible Zig Version: `0.14.0`
 
 Latest Release: `0.3.0`
 ```
-zig fetch --save git+https://github.com/tardy-org/tardy#v0.3.0
+zig fetch --save git+https://github.com/minix/tardy#v0.3.0
 ```
 
 You can then add the dependency in your `build.zig` file:

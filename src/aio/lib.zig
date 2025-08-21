@@ -219,7 +219,6 @@ pub const Async = struct {
 
     pub fn queue_job(self: *Async, task: usize, job: AsyncSubmission) !void {
         assert(self.attached);
-        log.debug("queuing up job={s} at index={d}", .{ @tagName(job), task });
         try self.vtable.queue_job(self.runner, task, job);
     }
 

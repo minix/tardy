@@ -543,12 +543,6 @@ pub const AsyncIoUring = struct {
             uring.jobs.release(job.index);
 
             const result: Result = blk: {
-                if (cqe.res < 0) {
-                    log.debug("{d} - other status on SQE: {s}", .{
-                        job.index,
-                        @tagName(@as(LinuxError, @enumFromInt(-cqe.res))),
-                    });
-                }
                 switch (job.type) {
                     .wake => {
                         try uring.queue_wake();

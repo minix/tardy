@@ -31,7 +31,6 @@ pub fn Spsc(comptime T: type) type {
             rt: *Runtime,
 
             pub fn send(self: Producer, message: T) !void {
-                std.log.debug("producer sending...", .{});
                 while (true) switch (self.inner.state.load(.acquire)) {
                     // Both ends must be open.
                     .starting => try self.rt.scheduler.trigger_await(),
@@ -64,7 +63,6 @@ pub fn Spsc(comptime T: type) type {
             rt: *Runtime,
 
             pub fn recv(self: Consumer) !T {
-                log.debug("consumer recving...", .{});
                 while (true) switch (self.inner.state.load(.acquire)) {
                     // Both ends must be open.
                     .starting => try self.rt.scheduler.trigger_await(),

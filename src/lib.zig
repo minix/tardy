@@ -106,7 +106,6 @@ pub fn Tardy(comptime selected_aio_type: AsyncType) type {
         mutex: std.Thread.Mutex = .{},
 
         pub fn init(allocator: std.mem.Allocator, options: TardyOptions) !Self {
-            log.debug("aio backend: {s}", .{@tagName(aio_type)});
 
             return .{
                 .allocator = allocator,
@@ -189,7 +188,6 @@ pub fn Tardy(comptime selected_aio_type: AsyncType) type {
                 runtime_count -| 1,
             );
             defer {
-                log.debug("waiting for the remaining threads to terminate", .{});
                 for (threads.items) |thread| thread.join();
                 threads.deinit(self.allocator);
             }
@@ -246,7 +244,6 @@ pub fn Tardy(comptime selected_aio_type: AsyncType) type {
             }
 
             while (spawned_count.load(.acquire) < spawning_count) {}
-            log.debug("all runtimes spawned, initalizing...", .{});
 
             @call(.auto, entry_func, .{ &runtime, entry_params }) catch |e| {
                 log.err("0 - entry error={}", .{e});

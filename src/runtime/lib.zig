@@ -69,7 +69,6 @@ pub const Runtime = struct {
     /// Safe to call from a different Runtime.
     pub fn trigger(self: *Runtime, index: usize) !void {
         if (self.running) {
-            log.debug("{d} - triggering {d}", .{ self.id, index });
             try self.scheduler.trigger(index);
             try self.wake();
         }
@@ -137,21 +136,13 @@ pub const Runtime = struct {
             // Processing Section
             var iter = self.scheduler.tasks.dirty.iterator(.{ .kind = .set });
             while (iter.next()) |index| {
-                log.debug("{d} - processing index={d}", .{ self.id, index });
                 const task = self.scheduler.tasks.get_ptr(index);
                 switch (task.state) {
                     .runnable => {
-                        log.debug("{d} - running index={d}", .{ self.id, index });
                         try self.run_task(task);
                         self.current_task = null;
                     },
                     .wait_for_trigger => if (self.scheduler.triggers.is_set(index)) {
-                        log.debug("{d} - trigger={d} | state={s}", .{
-                            self.id,
-                            index,
-                            @tagName(task.state),
-                        });
-
                         self.scheduler.triggers.unset(index);
                         try self.scheduler.set_runnable(index);
                     },
@@ -170,19 +161,16 @@ pub const Runtime = struct {
             // If we don't have any runnable tasks, we just want to wait for an Async I/O.
             // Otherwise, we want to just reap whatever completion we have and continue running.
             const wait_for_io = self.scheduler.runnable == 0;
-            log.debug("{d} - Wait for I/O: {}", .{ self.id, wait_for_io });
 
             const completions = try self.aio.reap(wait_for_io);
             for (completions) |completion| {
                 if (completion.result == .wake) {
                     force_woken = true;
-                    log.debug("{d} - waking up", .{self.id});
                     if (!self.running) return;
                     continue;
                 }
 
                 const index = completion.task;
-                log.debug("{d} - completion={d}", .{ self.id, index });
                 const task = self.scheduler.tasks.get_ptr(index);
                 assert(task.state == .wait_for_io);
                 task.result = completion.result;

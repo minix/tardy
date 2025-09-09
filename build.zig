@@ -2,7 +2,7 @@ const std = @import("std");
 const builtin = @import("builtin");
 const assert = std.debug.assert;
 
-const zig_version = std.SemanticVersion{ .major = 0, .minor = 14, .patch = 1 };
+const zig_version = std.SemanticVersion{ .major = 0, .minor = 15, .patch = 1 };
 
 comptime {
     // Compare versions while allowing different pre/patch metadata.
@@ -317,9 +317,11 @@ fn build_test(
     // usage: zig build test_unit
     const unit_tests = b.addTest(.{
         .name = "general unit tests",
-        .root_source_file = b.path("./src/tests.zig"),
-        .optimize = options.optimize,
-        .target = options.target,
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("./src/tests.zig"),
+            .optimize = options.optimize,
+            .target = options.target,
+        }),
     });
 
     const run_unit_tests = b.addRunArtifact(unit_tests);
@@ -374,7 +376,6 @@ fn build_test_e2e(
     const exe = b.addExecutable(.{
         .name = "e2e",
         .root_module = e2e_mod,
-        .strip = false,
     });
 
     // build/install e2e test
